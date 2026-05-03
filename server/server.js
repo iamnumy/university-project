@@ -16,10 +16,18 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
   .split(',')
   .map((o) => o.trim());
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  // Allow any Vercel preview/production deployment for this project
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return true;
+  return false;
+};
+
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      if (isAllowedOrigin(origin)) return cb(null, true);
       cb(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
